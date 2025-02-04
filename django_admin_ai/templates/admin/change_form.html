@@ -1,0 +1,90 @@
+{% extends "admin/change_form.html" %}
+
+{% block after_related_objects %}
+    {{ block.super }}
+
+    {% if ai_import_url %}
+        <div style="margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px; display: flex; align-items: center; gap: 10px;">
+            <label for="ai-import-file" style="font-weight: bold; display: flex; align-items: center; cursor: pointer;">
+                <span style="font-size: 18px; margin-right: 8px;">🤖</span> 
+                <span>Import data with AI:</span>
+            </label>
+            <input type="file" id="ai-import-file" accept=".txt" style="display: none;">
+            <label for="ai-import-file" 
+                   style="cursor: pointer; background-color: #2ea44f; color: white; padding: 8px 15px; 
+                          border-radius: 6px; text-align: center; font-weight: bold;">
+                📂 Upload .txt file
+            </label>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const fileInput = document.getElementById("ai-import-file");
+
+            function getCSRFToken() {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.startsWith('csrftoken=')) {
+                            cookieValue = cookie.substring('csrftoken='.length, cookie.length);
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            if (fileInput) {
+                fileInput.addEventListener("change", function () {
+                    if (!fileInput.files.length) return;
+
+                    const file = fileInput.files[0];
+                    const formData = new FormData();
+                    formData.append("file", file);
+
+                    Swal.fire({
+                        title: "Processing file...",
+                        text: "Please wait a few seconds.",
+                        icon: "info",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    fetch("{{ ai_import_url }}", {
+                        method: "POST",
+                        headers: {
+                            "X-CSRFToken": getCSRFToken()
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            Swal.fire("Error", data.error, "error");
+                            return;
+                        }
+
+                        Object.keys(data).forEach(fieldName => {
+                            const fieldInput = document.querySelector(`[name="${fieldName}"]`);
+                            if (fieldInput) fieldInput.value = data[fieldName];
+                        });
+
+                        Swal.fire("Success!", "Fields updated successfully.", "success");
+                        fileInput.value = "";
+                    })
+                    .catch(() => Swal.fire("Error", "There was a problem importing the data.", "error"));
+                });
+            }
+        });
+    </script>
+{% endblock %}
