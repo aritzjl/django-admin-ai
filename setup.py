@@ -13,9 +13,9 @@ setup(
     description="An AI-powered assistant for Django Admin, allowing data import using OpenAI.",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    author="Your Name",
-    author_email="your.email@example.com",
-    url="https://github.com/yourusername/django-admin-ai",  # Update with your GitHub
+    author="Aritz Jaber Lopes",
+    author_email="aritzzjl@gmail.com",
+    url="https://github.com/aritzjl/django-admin-ai",  # Update with your GitHub
     classifiers=[
         "Development Status :: 4 - Beta",
         "Framework :: Django",
