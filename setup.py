@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="django-admin-ai",  # Package name
-    version="0.1.0",  # Update version as needed
+    version="0.1.1",  # Update version as needed
     packages=find_packages(),  # Automatically find sub-packages
     include_package_data=True,  # Include static/templates
     install_requires=[
