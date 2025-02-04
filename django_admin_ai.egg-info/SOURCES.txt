@@ -1,3 +1,4 @@
+MANIFEST.in
 README.md
 setup.py
 django_admin_ai/__init__.py
@@ -13,3 +14,4 @@ django_admin_ai.egg-info/dependency_links.txt
 django_admin_ai.egg-info/requires.txt
 django_admin_ai.egg-info/top_level.txt
 django_admin_ai/migrations/__init__.py
+django_admin_ai/templates/admin/change_form.html
