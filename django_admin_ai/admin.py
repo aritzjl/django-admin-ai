@@ -35,7 +35,6 @@ class AIAdminMixin:
                     "admin_ai_import", args=[opts.app_label, opts.model_name]
                 )
             except Exception as e:
-                print(f"❌ Error in reverse(): {e}")
                 ai_import_url = "#"
 
             # Pass the URL to the context
