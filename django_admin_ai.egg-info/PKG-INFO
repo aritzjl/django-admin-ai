@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: django-admin-ai
-Version: 0.1.0
+Version: 0.1.1
 Summary: An AI-powered assistant for Django Admin, allowing data import using OpenAI.
 Home-page: https://github.com/aritzjl/django-admin-ai
 Author: Aritz Jaber Lopes
