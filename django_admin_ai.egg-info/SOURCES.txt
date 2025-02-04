@@ -1,0 +1,14 @@
+setup.py
+django_admin_ai/__init__.py
+django_admin_ai/admin.py
+django_admin_ai/apps.py
+django_admin_ai/models.py
+django_admin_ai/tests.py
+django_admin_ai/urls.py
+django_admin_ai/views.py
+django_admin_ai.egg-info/PKG-INFO
+django_admin_ai.egg-info/SOURCES.txt
+django_admin_ai.egg-info/dependency_links.txt
+django_admin_ai.egg-info/requires.txt
+django_admin_ai.egg-info/top_level.txt
+django_admin_ai/migrations/__init__.py
