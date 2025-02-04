@@ -1,3 +1,4 @@
+README.md
 setup.py
 django_admin_ai/__init__.py
 django_admin_ai/admin.py
