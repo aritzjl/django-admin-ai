@@ -1,13 +1,69 @@
 import json
+import logging
 from django.http import JsonResponse
 from django.apps import apps
 from django.conf import settings
 from openai import OpenAI
+import PyPDF2
+from doctr.models import ocr_predictor
+from doctr.io import DocumentFile
+import os
+
+# Set up logging
 
 # Load configuration from Django settings
 DJANGO_ADMIN_AI_CONFIG = settings.DJANGO_ADMIN_AI_CONFIG
 OPENAI_API_KEY = DJANGO_ADMIN_AI_CONFIG.get("openai_api_key")
 
+model = ocr_predictor(det_arch='db_resnet50', reco_arch='crnn_vgg16_bn', pretrained=True)
+
+def extract_text_from_image(uploaded_file):
+    """
+    Extracts text from an uploaded image file (any format: PNG, JPEG, JPG, BMP, etc.) using OCR.
+    Returns the extracted text as a string.
+    """
+    try:
+        # Save the uploaded file temporarily to disk with the appropriate extension
+        # Get file extension to ensure it's saved correctly
+        file_extension = uploaded_file.name.split('.')[-1].lower()
+        temp_filename = f"temp_image.{file_extension}"
+
+        with open(temp_filename, "wb") as f:
+            for chunk in uploaded_file.chunks():
+                f.write(chunk)
+
+        # Initialize the OCR model
+        model = ocr_predictor(pretrained=True)
+        
+        # Load the image and extract text
+        single_img_doc = DocumentFile.from_images(temp_filename)
+        result = model(single_img_doc)
+
+        # Log before deleting the temporary file
+
+        # Delete the temporary image file after processing
+        os.remove(temp_filename)
+
+        # Log the result for debugging
+        return result
+
+    except Exception as e:
+        raise ValueError(f"Error processing the image: {str(e)}")
+    
+def extract_text_from_pdf(uploaded_file):
+    """
+    Extract text from a PDF file using PyPDF2.
+    Returns the extracted text as a string.
+    """
+    try:
+        pdf_reader = PyPDF2.PdfReader(uploaded_file)
+        text = ""
+        for page_num in range(len(pdf_reader.pages)):
+            page = pdf_reader.pages[page_num]
+            text += page.extract_text() or ""
+        return text.strip()
+    except Exception as e:
+        raise ValueError(f"Error reading PDF file: {str(e)}")
 
 def get_form_structure(model):
     """
@@ -96,7 +152,7 @@ def extract_data(form_fields, file_content):
 
 def ai_import_view(request, app_label, model_name):
     """
-    Django view to handle a `.txt` file upload, extract data using OpenAI, 
+    Django view to handle a `.txt`, `.pdf`, or `.png` file upload, extract data using OpenAI, 
     and return structured JSON data for form auto-filling.
     """
     if request.method != "POST":
@@ -107,19 +163,25 @@ def ai_import_view(request, app_label, model_name):
     if not uploaded_file:
         return JsonResponse({"error": "No file uploaded."}, status=400)
 
-    if not uploaded_file.name.endswith(".txt"):
-        return JsonResponse({"error": "Only .txt files are allowed."}, status=400)
-
     # Read file content
     try:
-        file_content = uploaded_file.read().decode("utf-8").strip()
-    except UnicodeDecodeError:
-        return JsonResponse({"error": "Invalid file format. Ensure it is a valid .txt file."}, status=400)
+        if uploaded_file.name.endswith(".txt"):
+            file_content = uploaded_file.read().decode("utf-8").strip()
+        elif uploaded_file.name.endswith(".pdf"):
+            file_content = extract_text_from_pdf(uploaded_file)
+        elif uploaded_file.name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp")):
+            file_content = extract_text_from_image(uploaded_file)
+        else:
+            raise ValueError("Unsupported file type")
+    except UnicodeDecodeError as e:
+        return JsonResponse({"error": "Invalid file format. Ensure it is a valid .txt or .pdf file."}, status=400)
+    except Exception as e:
+        return JsonResponse({"error": f"Error processing the file: {str(e)}"}, status=500)
 
     # Dynamically retrieve the Django model
     try:
         model = apps.get_model(app_label, model_name)
-    except LookupError:
+    except LookupError as e:
         return JsonResponse({"error": "Model not found."}, status=400)
 
     # Generate form structure JSON
