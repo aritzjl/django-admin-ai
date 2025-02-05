@@ -11,7 +11,7 @@ An **AI-powered enhancement** for Django Admin that integrates artificial intell
 ### 🔮 Future Enhancements (Planned Features)
 
 🚀 **Voice input support**: Record audio directly in Django Admin and let AI extract and fill form data.  
-🚀 **Foreign Key handling**: AI-assisted suggestions for ForeignKey fields.  
+🚀 **Foreign Key handling**: AI-driven form population for ForeignKey fields.  
 🚀 **Embedded AI chatbot**: A chatbot trained with your database schema to assist users and execute database queries on demand.  
 
 ---
