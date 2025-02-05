@@ -8,22 +8,26 @@ automatic form population, intelligent suggestions, and more.
 Key Features:
 - Automated field population in Django models using AI
 
-pip install django-admin-ai
+### Installation
+Prerequisites
+- Python 3.8+ or later
+- Django 3.0+ or later
 
-en settings.py de el proyecto añadir
-- import django_admin_ai y import os
-- INSTALLED APPS -> 'django_admin_ai'
-- TEMPLATES -> DIRS -> [os.path.join(BASE_DIR, 'templates/'),  
+To install the library, run the following on your terminal:<br>
+ 
+```pip install django-admin-ai```
+
+### Setup
+On your __projects__ settings.py add the following:
+- ```import django_admin_ai``` and ```import os```
+- INSTALLED APPS → ```'django_admin_ai'```
+- TEMPLATES → DIRS → ```[os.path.join(BASE_DIR, 'templates/'),  
                         os.path.join(os.path.dirname(django_admin_ai.__file__), 'templates'),
-                        ]
-- DJANGO_ADMIN_AI_CONFIG = {
-                            "openai_api_key": "<YOUR_OPENAI_API_KEY>"
-                            }
-- 
-a urls.py del proyecto 
--ulrpatterns = [
-                path('', include('django_admin_ai.urls'))
-                ]
+                        ]```
+-  ```DJANGO_ADMIN_AI_CONFIG = {"openai_api_key": "<YOUR_OPENAI_API_KEY>"}```
 
-en admin.py de tu app por cada clase de tablas 
-- ai_import = True
+On the urls.py of your __project__ add the next path:
+- ```ulrpatterns = [ path('', include('django_admin_ai.urls'))]```
+
+On the admin.py of your __app__, for each class that contains modals for the tables, add this:   
+- ```ai_import = True```
