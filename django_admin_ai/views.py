@@ -1,5 +1,4 @@
 import json
-import logging
 from django.http import JsonResponse
 from django.apps import apps
 from django.conf import settings
@@ -8,14 +7,42 @@ import PyPDF2
 from doctr.models import ocr_predictor
 from doctr.io import DocumentFile
 import os
-
-# Set up logging
+from openai import OpenAI
 
 # Load configuration from Django settings
 DJANGO_ADMIN_AI_CONFIG = settings.DJANGO_ADMIN_AI_CONFIG
 OPENAI_API_KEY = DJANGO_ADMIN_AI_CONFIG.get("openai_api_key")
 
 model = ocr_predictor(det_arch='db_resnet50', reco_arch='crnn_vgg16_bn', pretrained=True)
+
+def extract_text_from_audio(uploaded_audio):
+    """
+    Extracts text from an uploaded audio file (e.g., MP3, WAV) using OpenAI's Whisper model.
+    Returns the transcribed text as a string.
+    """
+    client = OpenAI(api_key=OPENAI_API_KEY)
+    try:
+        # Save the uploaded file temporarily to disk with the appropriate extension
+        audio_extension = uploaded_audio.name.split('.')[-1].lower()
+        temp_audio_filename = f"temp_audio.{audio_extension}"
+
+        # Save the audio file to disk
+        with open(temp_audio_filename, "wb") as f:
+            for chunk in uploaded_audio.chunks():
+                f.write(chunk)
+
+        # Open the audio file to send it to the OpenAI API
+        with open(temp_audio_filename, "rb") as audio_file:
+            transcription = client.audio.transcriptions.create(
+                model="whisper-1",  # Whisper model
+                file=audio_file,
+                response_format="text"  # To get plain text response
+                
+            )
+        return transcription
+
+    except Exception as e:
+        raise ValueError(f"Error processing the audio: {str(e)}")
 
 def extract_text_from_image(uploaded_file):
     """
@@ -171,6 +198,9 @@ def ai_import_view(request, app_label, model_name):
             file_content = extract_text_from_pdf(uploaded_file)
         elif uploaded_file.name.lower().endswith((".png", ".jpg", ".jpeg", ".bmp", ".gif", ".webp")):
             file_content = extract_text_from_image(uploaded_file)
+        elif uploaded_file.name.lower().endswith((".wav", ".m4a")):
+            uploaded_audio = uploaded_file
+            file_content = extract_text_from_audio(uploaded_audio)
         else:
             raise ValueError("Unsupported file type")
     except UnicodeDecodeError as e:

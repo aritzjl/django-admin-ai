@@ -8,6 +8,8 @@ setup(
     install_requires=[
         "Django>=3.2",  # Define Django version requirement
         "openai>=1.0",  # AI functionality
+        "PyPDF2>=2.10.0",  # PDF reading
+        "doctr>=0.3.0",  # OCR functionality
     ],
     python_requires=">=3.7",  # Define minimum Python version
     description="An AI-powered assistant for Django Admin, allowing data import using OpenAI.",
